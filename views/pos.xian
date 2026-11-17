@@ -1,0 +1,403 @@
+{{> head}}
+<body class="bg-[#FDFBF7] font-sans h-screen flex flex-col overflow-hidden m-0 p-0 text-[#2C221E]">
+
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar Navigation -->
+        <aside class="w-20 bg-white border-r border-stone-200 flex flex-col items-center py-6 space-y-8 flex-shrink-0">
+            <div class="w-10 h-10 bg-[#C85A32] rounded-xl flex items-center justify-center text-white text-xl shadow-md">🥐</div>
+            <nav class="flex flex-col space-y-6 text-stone-400">
+                <button class="hover:text-[#C85A32]" title="Dashboard">🏠</button>
+                <button class="w-10 h-10 bg-[#F9EFEA] text-[#C85A32] rounded-xl flex items-center justify-center" title="POS Terminal">🎛️</button>
+                <button class="hover:text-[#C85A32]" title="Kitchen Orders">⏱️</button>
+                <button class="hover:text-[#C85A32]" title="Sales Reports">📈</button>
+                <button class="hover:text-[#C85A32]" title="Saved Orders">🔖</button>
+                <button class="hover:text-[#C85A32]" title="Settings">⚙️</button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Grid -->
+        <main class="flex-1 flex flex-col p-6 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <div>
+                    <p class="text-xs text-stone-400" id="currentDate"></p>
+                    <h1 class="text-2xl font-bold text-[#2C221E]">WILDFLOUR RESTUARANT</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-[#F9EFEA] border border-[#EED7CE] px-3 py-1.5 rounded-lg text-xs font-bold text-[#C85A32]">
+                        📢 Walk-In Touchscreen Counter
+                    </div>
+                    <input type="text" id="searchInput" placeholder="🔍 Type food or drinks..." onkeyup="handleSearchKey(event)" class="bg-white border border-stone-200 rounded-full px-4 py-2 text-sm w-64 shadow-sm focus:outline-none focus:border-[#C85A32]">
+                </div>
+            </div>
+
+            <!-- Categories Pill Bar -->
+            <div id="categoryBar" class="flex space-x-3 mb-6 overflow-x-auto pb-2 flex-shrink-0">
+                <button onclick="filterCategory('All', this)" class="cat-btn bg-[#C85A32] text-white px-5 py-2 rounded-full text-sm font-medium shadow-sm transition">All</button>
+                <button onclick="filterCategory('Pizza', this)" class="cat-btn bg-white text-stone-500 px-5 py-2 rounded-full text-sm font-medium border border-stone-200 hover:bg-stone-50 transition">Pizza</button>
+                <button onclick="filterCategory('Drinks', this)" class="cat-btn bg-white text-stone-500 px-5 py-2 rounded-full text-sm font-medium border border-stone-200 hover:bg-stone-50 transition">Drinks</button>
+                <button onclick="filterCategory('Fast Food', this)" class="cat-btn bg-white text-stone-500 px-5 py-2 rounded-full text-sm font-medium border border-stone-200 hover:bg-stone-50 transition">Fast Food</button>
+                <button onclick="filterCategory('Noodle', this)" class="cat-btn bg-white text-stone-500 px-5 py-2 rounded-full text-sm font-medium border border-stone-200 hover:bg-stone-50 transition">Noodle</button>
+                <button onclick="filterCategory('Desert', this)" class="cat-btn bg-white text-stone-500 px-5 py-2 rounded-full text-sm font-medium border border-stone-200 hover:bg-stone-50 transition">Desert</button>
+                <button onclick="filterCategory('Sea Food', this)" class="cat-btn bg-white text-stone-500 px-5 py-2 rounded-full text-sm font-medium border border-stone-200 hover:bg-stone-50 transition">Sea Food</button>
+            </div>
+
+            <!-- Food Grid Cards -->
+            <div id="productGrid" class="grid grid-cols-3 gap-5 pb-6">
+                <!-- Rendered via JS -->
+            </div>
+        </main>
+
+        <!-- Right Order Summary & Billing Panel -->
+        <aside class="w-96 bg-white border-l border-stone-200 flex flex-col p-6 justify-between shadow-sm flex-shrink-0">
+            <div>
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-xl font-bold text-[#2C221E]">Current Order</h2>
+                    <span id="orderNumberBadge" class="text-xs bg-[#F9EFEA] text-[#C85A32] px-2.5 py-1 rounded-full font-bold">Queue #101</span>
+                </div>
+
+                <!-- Customer Name Input -->
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-stone-600 mb-1">Customer Name (Calling Name):</label>
+                    <input type="text" id="customerName" placeholder="e.g. John" class="w-full bg-stone-50 border border-stone-200 rounded-lg px-3 py-1.5 text-xs font-medium text-[#2C221E] focus:outline-none focus:border-[#C85A32]">
+                </div>
+                
+                <!-- Order Type Selector -->
+                <div class="flex bg-stone-100 p-1 rounded-full mb-4">
+                    <button onclick="setOrderType('Walk-In', this)" class="order-type-btn flex-1 bg-[#C85A32] text-white text-xs py-1.5 rounded-full font-medium shadow-sm transition">Walk-In</button>
+                    <button onclick="setOrderType('Pick Up', this)" class="order-type-btn flex-1 text-stone-500 text-xs py-1.5 rounded-full font-medium transition">Pick Up</button>
+                    <button onclick="setOrderType('Delivery', this)" class="order-type-btn flex-1 text-stone-500 text-xs py-1.5 rounded-full font-medium transition">Delivery</button>
+                </div>
+
+                <!-- Cart Items List -->
+                <div id="cartList" class="space-y-3 max-h-48 overflow-y-auto pr-1">
+                    <p class="text-xs text-stone-400 text-center py-6">No items ordered yet</p>
+                </div>
+            </div>
+
+            <div>
+                <!-- Cash Tendered Input -->
+                <div class="mb-3 bg-stone-50 p-3 rounded-xl border border-stone-200">
+                    <div class="flex justify-between items-center text-xs text-stone-600 mb-1">
+                        <span class="font-bold">Cash Tendered:</span>
+                        <input type="number" id="cashInput" oninput="calculateChange()" placeholder="0.00" class="w-24 text-right bg-white border border-stone-200 rounded px-2 py-1 font-bold text-[#2C221E] focus:outline-none focus:border-[#C85A32]">
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-stone-600">
+                        <span class="font-bold">Change:</span>
+                        <span id="changeText" class="font-bold text-[#C85A32]">₱0.00</span>
+                    </div>
+                </div>
+
+                <!-- Totals Breakdown -->
+                <div class="space-y-1.5 border-t border-stone-100 pt-3 mb-4 text-xs">
+                    <div class="flex justify-between text-stone-500"><span>Subtotal</span><span id="subtotalText">₱0.00</span></div>
+                    <div class="flex justify-between text-[#C85A32] font-medium"><span>Discount</span><span id="discountText">-₱0.00</span></div>
+                    <div class="flex justify-between text-[#2C221E] font-bold text-sm pt-2 border-t border-dashed border-stone-200"><span>Total Amount</span><span id="totalText" class="text-base text-[#C85A32]">₱0.00</span></div>
+                </div>
+
+                <!-- Payment Methods -->
+                <p class="text-xs font-bold text-stone-700 mb-2">Payment Method</p>
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    <button onclick="setPayment('Cash', this)" class="pay-btn bg-[#2C221E] text-white text-xs py-2 rounded-lg font-medium transition">Cash</button>
+                    <button onclick="setPayment('Debit', this)" class="pay-btn bg-white border border-stone-200 text-stone-600 text-xs py-2 rounded-lg font-medium transition">Debit</button>
+                    <button onclick="setPayment('E-Wallet', this)" class="pay-btn bg-white border border-stone-200 text-stone-600 text-xs py-2 rounded-lg font-medium transition">E-Wallet</button>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="sendToKitchen()" class="bg-[#B45309] text-white py-2.5 rounded-xl text-xs font-bold shadow hover:bg-[#92400E] transition cursor-pointer">Kitchen Order</button>
+                    <button onclick="processCheckout()" class="bg-[#C85A32] text-white py-2.5 rounded-xl text-xs font-bold shadow-lg shadow-[#F9EFEA] hover:bg-[#B04C28] transition cursor-pointer">Checkout / Pay</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white w-96 p-6 rounded-2xl shadow-2xl relative">
+            <h3 class="text-center font-bold text-lg text-[#2C221E] mb-1">PARISIAN BISTRO</h3>
+            <p class="text-center text-xs text-stone-400 mb-2">Artisanal Branch<br>Walk-In Self-Service Receipt</p>
+            <div id="receiptDetails" class="text-xs space-y-2 border-y border-stone-200 py-3 mb-4">
+                <!-- Dynamic Receipt Information -->
+            </div>
+            <div class="flex space-x-2">
+                <button onclick="printReceipt()" class="flex-1 bg-[#2C221E] text-white py-2 rounded-xl text-xs font-bold">Print Receipt</button>
+                <button onclick="closeModal()" class="flex-1 bg-stone-200 text-stone-700 py-2 rounded-xl text-xs font-bold">Close</button>
+            </div>
+        </div>
+    </div>
+
+    {{> footer}}
+
+    <script>
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+        const products = [
+            // PIZZA CATEGORY
+            { id: 1, name: "Onion Pizza", category: "Pizza", price: 320.00, desc: "Classic pizza with fresh onions and cheese.", rating: 5.0, image: "/images/pizza1.jpg" },
+            { id: 2, name: "Mix Veg Pizza", category: "Pizza", price: 380.00, desc: "Loaded with bell peppers, onions, and herbs.", rating: 4.8, image: "/images/pizza2.jpg" },
+            { id: 3, name: "Pepperoni Pizza", category: "Pizza", price: 420.00, desc: "Topped with spicy pepperoni slices.", rating: 4.9, image: "/images/pizza3.jpg" },
+            { id: 4, name: "Hawaiian Pizza", category: "Pizza", price: 350.00, desc: "Sweet pineapple chunks with ham and cheese.", rating: 4.7, image: "/images/pizza4.jpg" },
+            { id: 5, name: "Mushroom Pizza", category: "Pizza", price: 390.00, desc: "Packed with fresh button mushrooms.", rating: 4.9, image: "/images/pizza5.jpg" },
+            { id: 6, name: "Four Cheese Pizza", category: "Pizza", price: 450.00, desc: "A delightful blend of four rich cheeses.", rating: 4.6, image: "/images/pizza6.jpg" },
+
+            // DRINKS CATEGORY
+            { id: 7, name: "Special Iced Tea", category: "Drinks", price: 65.00, desc: "Refreshing sweet citrus house blend iced tea.", rating: 4.8, image: "/images/drinks1.jpg" },
+            { id: 8, name: "Classic Soda", category: "Drinks", price: 50.00, desc: "Chilled carbonated soft drink.", rating: 5.0, image: "/images/drinks2.jpg" },
+            { id: 9, name: "Mango Fruit Shake", category: "Drinks", price: 95.00, desc: "Fresh sweet Philippine mango blended with ice.", rating: 4.9, image: "/images/drinks3.jpg" },
+            { id: 10, name: "Lemon Juice", category: "Drinks", price: 70.00, desc: "Refreshing freshly squeezed lemon drink.", rating: 4.7, image: "/images/drinks4.jpg" },
+            { id: 11, name: "Buko Juice", category: "Drinks", price: 60.00, desc: "Fresh natural young coconut water.", rating: 4.9, image: "/images/drinks5.jpg" },
+            { id: 12, name: "Chocolate Smoothie", category: "Drinks", price: 110.00, desc: "Rich chocolate blended with milk and ice.", rating: 4.8, image: "/images/drinks6.jpg" },
+            { id: 13, name: "Strawberry Shake", category: "Drinks", price: 100.00, desc: "Sweet and creamy strawberry fruit shake.", rating: 4.6, image: "/images/drinks7.jpg" },
+            { id: 14, name: "Bottled Mineral Water", category: "Drinks", price: 30.00, desc: "Pure purified drinking water.", rating: 5.0, image: "/images/drinks8.jpg" },
+
+            // FAST FOOD CATEGORY
+            { id: 15, name: "Crispy Fried Chicken", category: "Fast Food", price: 150.00, desc: "Golden crispy fried chicken with gravy.", rating: 4.9, image: "/images/fastfood1.jpg" },
+            { id: 16, name: "Burger Value Meal", category: "Fast Food", price: 170.00, desc: "Beef burger with fries and drink.", rating: 4.8, image: "/images/fastfood2.jpg" },
+            { id: 17, name: "French Fries", category: "Fast Food", price: 90.00, desc: "Crispy salted potato fries.", rating: 4.7, image: "/images/fastfood3.jpg" },
+            { id: 18, name: "Cheeseburger", category: "Fast Food", price: 120.00, desc: "Juicy beef patty with melted cheese.", rating: 4.8, image: "/images/fastfood4.jpg" },
+            { id: 19, name: "Chicken Nuggets", category: "Fast Food", price: 110.00, desc: "Crispy breaded chicken nuggets with dip.", rating: 4.6, image: "/images/fastfood5.jpg" },
+            { id: 20, name: "Hotdog Sandwich", category: "Fast Food", price: 85.00, desc: "Classic hotdog with cheese and sauce.", rating: 4.5, image: "/images/fastfood6.jpg" },
+            { id: 21, name: "Loaded Nachos", category: "Fast Food", price: 140.00, desc: "Tortilla chips with cheese and beef toppings.", rating: 4.8, image: "/images/fastfood7.jpg" },
+            { id: 22, name: "Club Sandwich", category: "Fast Food", price: 130.00, desc: "Multi-layer sandwich with chicken and bacon.", rating: 4.7, image: "/images/fastfood8.jpg" },
+            { id: 23, name: "Corndog", category: "Fast Food", price: 75.00, desc: "Deep-fried battered sausage on a stick.", rating: 4.6, image: "/images/fastfood9.jpg" },
+            { id: 24, name: "Tacos Supreme", category: "Fast Food", price: 135.00, desc: "Crispy taco shell with ground meat and veggies.", rating: 4.8, image: "/images/fastfood10.jpg" },
+            { id: 25, name: "Onion Rings", category: "Fast Food", price: 95.00, desc: "Crispy battered deep-fried onion rings.", rating: 4.7, image: "/images/fastfood11.jpg" },
+            { id: 26, name: "Chicken Wings", category: "Fast Food", price: 190.00, desc: "Spicy glazed buffalo chicken wings.", rating: 4.9, image: "/images/fastfood12.jpg" },
+            { id: 27, name: "Bacon Burger", category: "Fast Food", price: 180.00, desc: "Burger patty stacked with crispy bacon.", rating: 4.9, image: "/images/fastfood13.jpg" },
+
+            // NOODLE CATEGORY
+            { id: 28, name: "Special Pancit Palabok", category: "Noodle", price: 160.00, desc: "Traditional noodles with rich shrimp sauce.", rating: 4.9, image: "/images/noodle1.jpg" },
+            { id: 29, name: "Beef Ramen", category: "Noodle", price: 220.00, desc: "Japanese style noodle soup with tender beef.", rating: 4.9, image: "/images/noodle2.jpg" },
+            { id: 30, name: "Pancit Canton", category: "Noodle", price: 150.00, desc: "Stir-fried noodles with vegetables and meat.", rating: 4.8, image: "/images/noodle3.jpg" },
+            { id: 31, name: "Spaghetti Bolognese", category: "Noodle", price: 170.00, desc: "Pasta with rich tomato meat sauce and cheese.", rating: 4.8, image: "/images/noodle4.jpg" },
+            { id: 32, name: "Carbonara Pasta", category: "Noodle", price: 180.00, desc: "Creamy pasta with bacon and parmesan.", rating: 4.9, image: "/images/noodle5.jpg" },
+            { id: 33, name: "Bihon Guisado", category: "Noodle", price: 140.00, desc: "Sauted rice noodles with meat and veggies.", rating: 4.7, image: "/images/noodle6.jpg" },
+            { id: 34, name: "Lami Soup Noodles", category: "Noodle", price: 165.00, desc: "Hot savory noodle soup with egg and garnish.", rating: 4.8, image: "/images/noodle7.jpg" },
+            { id: 35, name: "Japchae Noodles", category: "Noodle", price: 200.00, desc: "Korean stir-fried glass noodles with sesame.", rating: 4.9, image: "/images/noodle8.jpg" },
+            { id: 36, name: "Batchoy Special", category: "Noodle", price: 155.00, desc: "Noodle soup with pork organs, crushed chicharon.", rating: 4.9, image: "/images/noodle9.jpg" },
+            { id: 37, name: "Pad Thai Noodles", category: "Noodle", price: 210.00, desc: "Stir-fried rice noodles with peanuts and tofu.", rating: 4.8, image: "/images/noodle10.jpg" },
+
+            // DESSERT CATEGORY
+            { id: 38, name: "Blueberry Chocolate Cupcake", category: "Desert", price: 120.00, desc: "Moist dark chocolate cupcake topped with vanilla frosting, berry drizzle, and blueberries.", rating: 5.0, image: "/images/dessert1.jpg" },
+            { id: 39, name: "Blueberry Cheesecake", category: "Desert", price: 90.00, desc: "Creamy classic cheesecake topped with sweet blueberry compote.", rating: 4.9, image: "/images/dessert2.jpg" },
+            { id: 40, name: "Raspberry Vanilla Cupcake", category: "Desert", price: 130.00, desc: "Fluffy vanilla cupcake with buttercream frosting, raspberry drizzle, and fresh berries.", rating: 4.9, image: "/images/dessert3.jpg" },
+            { id: 41, name: "Chocolate Roll a la Mode", category: "Desert", price: 110.00, desc: "Rich chocolate cream roll drizzled with fudge and topped with vanilla ice cream.", rating: 4.9, image: "/images/dessert4.jpg" },
+            { id: 42, name: "Ube Blueberry Cupcake", category: "Desert", price: 140.00, desc: "Soft cupcake topped with swirled berry frosting and fresh blueberries.", rating: 4.8, image: "/images/dessert5.jpg" },
+            { id: 43, name: "Lemon Glaze Cupcake", category: "Desert", price: 85.00, desc: "Zesty lemon cupcake topped with creamy frosting and sweet citrus drizzle.", rating: 4.7, image: "/images/dessert6.jpg" },
+            { id: 44, name: "Chocolate Berry Crepe", category: "Desert", price: 135.00, desc: "Delicate folded crepe drizzled with chocolate sauce and topped with fresh berries.", rating: 4.9, image: "/images/dessert7.jpg" },
+            { id: 45, name: "Mocha Chocolate Cupcake", category: "Desert", price: 95.00, desc: "Rich chocolate cupcake topped with creamy coffee buttercream frosting.", rating: 4.7, image: "/images/dessert8.jpg" },
+            { id: 46, name: "Mint Chocolate Cupcake", category: "Desert", price: 150.00, desc: "Dark chocolate cupcake topped with cool mint frosting and chocolate pieces.", rating: 4.8, image: "/images/dessert9.jpg" },
+            { id: 47, name: "Chocolate Chip Cookies", category: "Desert", price: 75.00, desc: "Warm, chewy cookies loaded with rich chocolate chips.", rating: 4.6, image: "/images/dessert10.jpg" },
+            { id: 48, name: "Mixed Berry Cupcake", category: "Desert", price: 125.00, desc: "Sweet berry cupcake topped with pink buttercream and fresh mixed berries.", rating: 4.8, image: "/images/dessert11.jpg" },
+            { id: 49, name: "Chocolate Almond Croissants", category: "Desert", price: 160.00, desc: "Flaky, buttery croissants drizzled with dark chocolate and toasted almonds.", rating: 4.9, image: "/images/dessert12.jpg" },
+            { id: 50, name: "Brownie a la Mode", category: "Desert", price: 100.00, desc: "Warm fudge brownie topped with vanilla ice cream, chocolate drizzle, and nuts.", rating: 4.7, image: "/images/dessert13.jpg" },
+            { id: 51, name: "Strawberry Chocolate Cheesecake", category: "Desert", price: 50.00, desc: "Rich strawberry cheesecake on a chocolate crust topped with fresh strawberries.", rating: 4.9, image: "/images/dessert14.jpg" },
+            { id: 52, name: "Chocolate Mousse Cake", category: "Desert", price: 90.00, desc: "Silky dark chocolate mousse dusted with cocoa and served with fresh strawberries.", rating: 4.8, image: "/images/dessert15.jpg" },
+            { id: 53, name: "Cheesecake a la Mode", category: "Desert", price: 60.00, desc: "Creamy cheesecake slice topped with vanilla ice cream and rich chocolate sauce.", rating: 4.6, image: "/images/dessert16.jpg" },
+
+            // SEA FOOD CATEGORY
+            { id: 54, name: "Pan-Seared Scallops", category: "Sea Food", price: 280.00, desc: "Tender sea scallops seared golden and finished with herbs and butter.", rating: 5.0, image: "/images/seafood1.jpg" },
+            { id: 55, name: "Garlic Butter Shrimps", category: "Sea Food", price: 240.00, desc: "Juicy shrimps tossed in a rich garlic butter sauce.", rating: 4.9, image: "/images/seafood2.jpg" },
+            { id: 56, name: "Seafood Ramen Noodle Soup", category: "Sea Food", price: 220.00, desc: "Hot savory noodle soup loaded with assorted seafood, eggs, and rich broth.", rating: 4.8, image: "/images/seafood3.jpg" },
+            { id: 57, name: "Grilled Stuffed Squid", category: "Sea Food", price: 290.00, desc: "Tender grilled squid stuffed with savory aromatics and glazed to perfection.", rating: 4.9, image: "/images/seafood4.jpg" },
+            { id: 58, name: "Grilled Inihaw na Pusit", category: "Sea Food", price: 210.00, desc: "Charcoal-grilled squid served with a savory dipping sauce.", rating: 4.8, image: "/images/seafood5.jpg" },
+            { id: 59, name: "Baked Mussels with Cheese", category: "Sea Food", price: 350.00, desc: "Green mussels baked with rich garlic butter, herbs, and melted cheese.", rating: 5.0, image: "/images/seafood6.jpg" },
+            { id: 60, name: "Grilled Lobster Tails", category: "Sea Food", price: 260.00, desc: "Succulent lobster tails grilled and served with lemon butter.", rating: 4.7, image: "/images/seafood7.jpg" },
+            { id: 61, name: "Cajun Seafood Boil", category: "Sea Food", price: 490.00, desc: "Assorted shrimps, crabs, mussels, and corn tossed in spicy Cajun sauce.", rating: 4.9, image: "/images/seafood8.jpg" },
+            { id: 62, name: "Spicy Seafood Soup", category: "Sea Food", price: 270.00, desc: "Sour tamarind soup with fresh shrimp, tomatoes, and vegetables.", rating: 4.8, image: "/images/seafood9.jpg" }
+        ];
+
+        let cart = [];
+        let selectedCategory = 'All';
+        let selectedPayment = 'Cash';
+        let selectedOrderType = 'Walk-In';
+        let queueNumber = 101;
+
+        function renderProducts(filter = 'All', search = '') {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            const filtered = products.filter(p => {
+                const matchCat = filter === 'All' || p.category === filter;
+                const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+                return matchCat && matchSearch;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<p class="col-span-3 text-center text-stone-400 py-10">No items found.</p>`;
+                return;
+            }
+
+            filtered.forEach((p, index) => {
+                grid.innerHTML += `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm border border-stone-200 flex flex-col justify-between cursor-pointer hover:border-[#C85A32] hover:shadow-md transition" onclick="addToCart(${p.id})">
+                        <div>
+                            <div class="h-48 bg-[#FDFBF7] rounded-xl mb-3 overflow-hidden flex items-center justify-center p-2">
+                                <img src="${p.image}" alt="${p.name}" class="w-full h-full object-contain rounded-lg" onerror="this.src='https://via.placeholder.com/150?text=Food';">
+                            </div>
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-bold text-[#2C221E] text-base">${p.name}</h3>
+                                <span class="font-bold text-[#C85A32]">₱${p.price.toFixed(2)}</span>
+                            </div>
+                            <p class="text-xs text-stone-500 mb-3">${p.desc}</p>
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-stone-100">
+                            <span class="text-xs font-bold text-amber-600">⭐ ${p.rating}</span>
+                            <span class="text-xs font-bold text-[#C85A32] bg-[#F9EFEA] px-2.5 py-1 rounded-lg">Tap / Enter</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function handleSearchKey(event) {
+            filterProducts();
+            if (event.key === 'Enter') {
+                const searchVal = document.getElementById('searchInput').value;
+                const filtered = products.filter(p => p.name.toLowerCase().includes(searchVal.toLowerCase()));
+                if (filtered.length === 1) {
+                    addToCart(filtered[0].id);
+                    document.getElementById('searchInput').value = '';
+                    filterProducts();
+                }
+            }
+        }
+
+        function filterCategory(cat, btn) {
+            selectedCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(b => {
+                b.className = "cat-btn bg-white text-stone-500 px-5 py-2 rounded-full text-sm font-medium border border-stone-200 hover:bg-stone-50 transition";
+            });
+            btn.className = "cat-btn bg-[#C85A32] text-white px-5 py-2 rounded-full text-sm font-medium shadow-sm transition";
+            renderProducts(selectedCategory, document.getElementById('searchInput').value);
+        }
+
+        function filterProducts() {
+            renderProducts(selectedCategory, document.getElementById('searchInput').value);
+        }
+
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const existing = cart.find(item => item.id === id);
+            if (existing) { existing.qty++; } else { cart.push({ ...product, qty: 1 }); }
+            updateCartUI();
+        }
+
+        function changeQty(id, delta) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.qty += delta;
+                if (item.qty <= 0) { cart = cart.filter(i => i.id !== id); }
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const cartList = document.getElementById('cartList');
+            cartList.innerHTML = '';
+            if (cart.length === 0) {
+                cartList.innerHTML = `<p class="text-xs text-stone-400 text-center py-6">No items ordered yet</p>`;
+                document.getElementById('subtotalText').innerText = '₱0.00';
+                document.getElementById('discountText').innerText = '-₱0.00';
+                document.getElementById('totalText').innerText = '₱0.00';
+                document.getElementById('changeText').innerText = '₱0.00';
+                return;
+            }
+
+            let subtotal = 0;
+            cart.forEach(item => {
+                subtotal += item.price * item.qty;
+                cartList.innerHTML += `
+                    <div class="flex items-center justify-between bg-stone-50 p-2.5 rounded-xl border border-stone-200">
+                        <div>
+                            <h4 class="text-xs font-bold text-[#2C221E]">${item.name}</h4>
+                            <p class="text-[10px] text-stone-500">₱${(item.price * item.qty).toFixed(2)}</p>
+                        </div>
+                        <div class="flex items-center space-x-2 text-xs font-bold">
+                            <button onclick="event.stopPropagation(); changeQty(${item.id}, -1)" class="w-5 h-5 bg-white border border-stone-200 rounded flex items-center justify-center cursor-pointer text-stone-700">-</button>
+                            <span>${String(item.qty).padStart(2, '0')}</span>
+                            <button onclick="event.stopPropagation(); changeQty(${item.id}, 1)" class="w-5 h-5 bg-white border border-stone-200 rounded flex items-center justify-center cursor-pointer text-stone-700">+</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const discount = cart.length > 0 ? 15.00 : 0.00;
+            const total = Math.max(0, subtotal - discount);
+
+            document.getElementById('subtotalText').innerText = `₱${subtotal.toFixed(2)}`;
+            document.getElementById('discountText').innerText = `-₱${discount.toFixed(2)}`;
+            document.getElementById('totalText').innerText = `₱${total.toFixed(2)}`;
+            calculateChange();
+        }
+
+        function calculateChange() {
+            const totalText = document.getElementById('totalText').innerText.replace('₱', '');
+            const total = parseFloat(totalText) || 0;
+            const cash = parseFloat(document.getElementById('cashInput').value) || 0;
+            const change = cash - total;
+            document.getElementById('changeText').innerText = change >= 0 ? `₱${change.toFixed(2)}` : `₱0.00`;
+        }
+
+        function setOrderType(type, btn) {
+            selectedOrderType = type;
+            document.querySelectorAll('.order-type-btn').forEach(b => {
+                b.className = "order-type-btn flex-1 text-stone-500 text-xs py-1.5 rounded-full font-medium transition";
+            });
+            btn.className = "order-type-btn flex-1 bg-[#C85A32] text-white text-xs py-1.5 rounded-full font-medium shadow-sm transition";
+        }
+
+        function setPayment(method, btn) {
+            selectedPayment = method;
+            document.querySelectorAll('.pay-btn').forEach(b => {
+                b.className = "pay-btn bg-white border border-stone-200 text-stone-600 text-xs py-2 rounded-lg font-medium transition";
+            });
+            btn.className = "pay-btn bg-[#2C221E] text-white text-xs py-2 rounded-lg font-medium transition";
+        }
+
+        function sendToKitchen() {
+            if (cart.length === 0) { alert("Please add items to your cart before sending to the kitchen."); return; }
+            const custName = document.getElementById('customerName').value || "Walk-In Guest";
+            alert(`👨‍🍳 Order successfully sent to kitchen!\nQueue #${queueNumber} - Name: ${custName} (${selectedOrderType})`);
+        }
+
+        function processCheckout() {
+            if (cart.length === 0) { alert("Please add items to your cart before checking out."); return; }
+            const custName = document.getElementById('customerName').value || "Walk-In Guest";
+            const total = document.getElementById('totalText').innerText;
+            const cash = parseFloat(document.getElementById('cashInput').value) || 0;
+            const totalNum = parseFloat(total.replace('₱', ''));
+
+            if (selectedPayment === 'Cash' && cash < totalNum) {
+                alert("Insufficient cash tendered by the customer.");
+                return;
+            }
+
+            let detailsHTML = `<p><b>Queue No:</b> #${queueNumber}</p><p><b>Customer Name:</b> ${custName}</p><p><b>Order Type:</b> ${selectedOrderType}</p><p><b>Payment Method:</b> ${selectedPayment}</p><hr class="my-2"><div class='space-y-1 my-2'>`;
+            cart.forEach(i => { detailsHTML += `<div class='flex justify-between'><span>${i.qty}x ${i.name}</span><span>₱${(i.price * i.qty).toFixed(2)}</span></div>`; });
+            detailsHTML += `</div><hr class="my-2"><p class='text-right font-bold text-sm'>Total: ${total}</p>`;
+            if (selectedPayment === 'Cash') {
+                detailsHTML += `<p class='text-right text-xs text-stone-500'>Tendered: ₱${cash.toFixed(2)} | Change: ₱${(cash - totalNum).toFixed(2)}</p>`;
+            }
+
+            document.getElementById('receiptDetails').innerHTML = detailsHTML;
+            document.getElementById('receiptModal').classList.remove('hidden');
+            document.getElementById('receiptModal').classList.add('flex');
+        }
+
+        function closeModal() {
+            document.getElementById('receiptModal').classList.remove('flex');
+            document.getElementById('receiptModal').classList.add('hidden');
+            cart = [];
+            document.getElementById('cashInput').value = '';
+            document.getElementById('customerName').value = '';
+            queueNumber++;
+            document.getElementById('orderNumberBadge').innerText = `Queue #${queueNumber}`;
+            updateCartUI();
+        }
+
+        function printReceipt() {
+            window.print();
+        }
+
+        renderProducts();
+    </script>
+</body>
